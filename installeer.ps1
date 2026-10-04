@@ -12,7 +12,9 @@ $ProgressPreference = "SilentlyContinue"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $Bronnen = @("https://raw.githubusercontent.com/slimwerken/mainframe-installer/main", "https://slimwerken.ai/installeer")
-$WizardZip = "wizard-c2ed162e43.zip"
+# MF_BRONNEN: alleen voor /installer-test (een proefversie op een vaste GitHub-commit).
+if ($env:MF_BRONNEN) { $Bronnen = $env:MF_BRONNEN -split ' ' }
+$WizardZip = "wizard-67ac55c05f.zip"
 $Map = Join-Path $env:USERPROFILE ".mainframe-installer"
 
 Write-Host ""
