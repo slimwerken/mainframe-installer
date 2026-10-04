@@ -13,7 +13,7 @@
 set -eu
 
 BRONNEN="https://raw.githubusercontent.com/slimwerken/mainframe-installer/main https://slimwerken.ai/installeer"
-WIZARD_ZIP="wizard-3e29b7a113.zip"
+WIZARD_ZIP="wizard-c2ed162e43.zip"
 MAP="$HOME/.mainframe-installer"
 ACHTERGROND=0
 for arg in "$@"; do
