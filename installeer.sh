@@ -12,8 +12,9 @@
 # Verder niets: alle echte stappen doe je in de wizard, met uitleg erbij.
 set -eu
 
-BRONNEN="https://raw.githubusercontent.com/slimwerken/mainframe-installer/main https://slimwerken.ai/installeer"
-WIZARD_ZIP="wizard-c2ed162e43.zip"
+# MF_BRONNEN: alleen voor /installer-test (een proefversie op een vaste GitHub-commit).
+BRONNEN="${MF_BRONNEN:-https://raw.githubusercontent.com/slimwerken/mainframe-installer/main https://slimwerken.ai/installeer}"
+WIZARD_ZIP="wizard-15319b1d8b.zip"
 MAP="$HOME/.mainframe-installer"
 ACHTERGROND=0
 for arg in "$@"; do
