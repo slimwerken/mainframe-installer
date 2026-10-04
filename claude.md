@@ -1,7 +1,7 @@
 # Mainframe installeren - instructies voor Claude
 
 **Ben je een mens?** Dan hoef je hier niets te doen. Plak in Claude de zin
-`Installeer mijn Mainframe volgens link.slimwerken.ai/mainframe` en Claude doet de rest.
+`Installeer mijn Mainframe volgens link.slimwerken.ai/installeer` en Claude doet de rest.
 
 **Ben je Claude?** De gebruiker vroeg je zijn Mainframe te installeren. Doe precies
 dit en verder niets. De gebruiker heeft geen technische kennis: praat kort en in
