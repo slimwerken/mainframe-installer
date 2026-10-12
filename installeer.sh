@@ -14,7 +14,7 @@ set -eu
 
 # MF_BRONNEN: alleen voor /installer-test (een proefversie op een vaste GitHub-commit).
 BRONNEN="${MF_BRONNEN:-https://raw.githubusercontent.com/slimwerken/mainframe-installer/main https://slimwerken.ai/installeer}"
-WIZARD_ZIP="wizard-f37772a2cb.zip"
+WIZARD_ZIP="wizard-e8827f797a.zip"
 MAP="$HOME/.mainframe-installer"
 ACHTERGROND=0
 for arg in "$@"; do
