@@ -14,7 +14,7 @@ $ProgressPreference = "SilentlyContinue"
 $Bronnen = @("https://raw.githubusercontent.com/slimwerken/mainframe-installer/main", "https://slimwerken.ai/installeer")
 # MF_BRONNEN: alleen voor /installer-test (een proefversie op een vaste GitHub-commit).
 if ($env:MF_BRONNEN) { $Bronnen = $env:MF_BRONNEN -split ' ' }
-$WizardZip = "wizard-ec93bce8dd.zip"
+$WizardZip = "wizard-36a4d51807.zip"
 $Map = Join-Path $env:USERPROFILE ".mainframe-installer"
 
 Write-Host ""
