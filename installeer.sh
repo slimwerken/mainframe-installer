@@ -14,7 +14,11 @@ set -eu
 
 # MF_BRONNEN: alleen voor /installer-test (een proefversie op een vaste GitHub-commit).
 BRONNEN="${MF_BRONNEN:-https://raw.githubusercontent.com/slimwerken/mainframe-installer/main https://slimwerken.ai/installeer}"
-WIZARD_ZIP="wizard-929e848c01.zip"
+WIZARD_ZIP="wizard-24b3439907.zip"
+# De SHA-256 van precies die zip, vastgezet door scripts/publiceer.py. Een zip die
+# hier niet op klopt (een andere bron die is overgenomen, of een kapotte download)
+# wordt nooit uitgepakt of gestart. Veiligheidscheck 23 okt 2026 (M6).
+WIZARD_SHA256="24b34399076a6d20bbddc9591702048294f04265bb43c6448b46c16f24a67577"
 MAP="$HOME/.mainframe-installer"
 ACHTERGROND=0
 for arg in "$@"; do
@@ -63,11 +67,23 @@ fi
 mkdir -p "$MAP"
 tijdelijk="$MAP/wizard-download.zip"
 gelukt=0
+afwijkend=0
 for BASIS in $BRONNEN; do
-  if curl -fsSL --retry 2 "$BASIS/$WIZARD_ZIP" -o "$tijdelijk"; then gelukt=1; break; fi
+  rm -f "$tijdelijk"
+  curl -fsSL --retry 2 "$BASIS/$WIZARD_ZIP" -o "$tijdelijk" || continue
+  # Python staat er al (hierboven gecontroleerd); shasum en sha256sum niet overal.
+  gemeten="$("$PY" -c "import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" "$tijdelijk")"
+  if [ "$gemeten" = "$WIZARD_SHA256" ]; then gelukt=1; break; fi
+  afwijkend=1
 done
 if [ "$gelukt" != "1" ]; then
-  echo "  Ik kan de installer niet downloaden. Kijk of de wifi aan staat en probeer het opnieuw."
+  rm -f "$tijdelijk"
+  if [ "$afwijkend" = "1" ]; then
+    echo "  De gedownloade installer is niet de versie die Slim Werken klaarzette. Ik start hem niet."
+    echo "  Probeer het over een paar minuten opnieuw; blijft dit, mail dan bart@slimwerken.ai."
+  else
+    echo "  Ik kan de installer niet downloaden. Kijk of de wifi aan staat en probeer het opnieuw."
+  fi
   exit 1
 fi
 rm -rf "$MAP/wizard.nieuw"
