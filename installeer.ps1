@@ -14,7 +14,10 @@ $ProgressPreference = "SilentlyContinue"
 $Bronnen = @("https://raw.githubusercontent.com/slimwerken/mainframe-installer/main", "https://slimwerken.ai/installeer")
 # MF_BRONNEN: alleen voor /installer-test (een proefversie op een vaste GitHub-commit).
 if ($env:MF_BRONNEN) { $Bronnen = $env:MF_BRONNEN -split ' ' }
-$WizardZip = "wizard-929e848c01.zip"
+$WizardZip = "wizard-24b3439907.zip"
+# De SHA-256 van precies die zip, vastgezet door scripts/publiceer.py. Een zip die hier
+# niet op klopt wordt nooit uitgepakt of gestart. Veiligheidscheck 23 okt 2026 (M6).
+$WizardSha256 = "24b34399076a6d20bbddc9591702048294f04265bb43c6448b46c16f24a67577"
 $Map = Join-Path $env:USERPROFILE ".mainframe-installer"
 
 Write-Host ""
@@ -69,11 +72,21 @@ if (-not $py) {
 New-Item -ItemType Directory -Force -Path $Map | Out-Null
 $zip = Join-Path $Map "wizard-download.zip"
 $gelukt = $false
+$afwijkend = $false
 foreach ($Basis in $Bronnen) {
-  try { Invoke-WebRequest "$Basis/$WizardZip" -OutFile $zip -UseBasicParsing; $gelukt = $true; break } catch { }
+  try { Invoke-WebRequest "$Basis/$WizardZip" -OutFile $zip -UseBasicParsing } catch { continue }
+  $gemeten = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLowerInvariant()
+  if ($gemeten -eq $WizardSha256) { $gelukt = $true; break }
+  $afwijkend = $true
+  Remove-Item $zip -Force -ErrorAction SilentlyContinue
 }
 if (-not $gelukt) {
-  Write-Host "  Ik kan de installer niet downloaden. Kijk of de wifi aan staat en probeer het opnieuw."
+  if ($afwijkend) {
+    Write-Host "  De gedownloade installer is niet de versie die Slim Werken klaarzette. Ik start hem niet."
+    Write-Host "  Probeer het over een paar minuten opnieuw; blijft dit, mail dan bart@slimwerken.ai."
+  } else {
+    Write-Host "  Ik kan de installer niet downloaden. Kijk of de wifi aan staat en probeer het opnieuw."
+  }
   exit 1
 }
 $nieuw = Join-Path $Map "wizard.nieuw"
