@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Sleutels veilig</title>
+<link rel="icon" href="../wizard-assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../wizard-assets/fonts.css">
+<style>
+  :root { --bg:#0a0e17; --vlak:#121826; --rand:rgba(255,255,255,.08); --rand-sterk:rgba(255,255,255,.16); --tekst:#f3f5f9;
+    --zacht:#9aa4b6; --stil:#687286; --oranje:#ff5a2e; --oranje-diep:#e0431f; --groen:#3ecf8e;
+    --sans:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; --vloei:cubic-bezier(.22,.8,.24,1); }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; color:var(--tekst); font:400 16px/1.6 var(--sans); -webkit-font-smoothing:antialiased;
+    background: radial-gradient(900px 520px at 50% -140px, rgba(255,90,46,.10), transparent 70%), var(--bg); }
+  .kop { display:flex; align-items:center; gap:10px; padding:22px 28px; font-weight:600; font-size:17px; }
+  .kop img { width:26px; height:26px; border-radius:7px; }
+  main { max-width:600px; margin:0 auto; padding:5vh 16px 80px; animation:in 600ms var(--vloei) both; }
+  @keyframes in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  h1 { margin:0 0 10px; font-size:clamp(32px,6vw,46px); line-height:1.08; font-weight:600; letter-spacing:-.025em; }
+  .sub { margin:0 0 34px; color:var(--zacht); font-size:18px; }
+  h2 { margin:44px 0 12px; font-size:22px; font-weight:600; letter-spacing:-.015em; }
+  p { margin:0 0 12px; color:var(--zacht); }
+  b { color:var(--tekst); font-weight:600; }
+  .vlak { padding:18px 20px; border-radius:14px; background:var(--vlak); border:1px solid var(--rand); margin:14px 0; }
+  .vlak p:last-child { margin-bottom:0; }
+  .drie { display:grid; gap:10px; margin:14px 0; }
+  .drie div { padding:16px 18px; border-radius:12px; background:var(--vlak); border:1px solid var(--rand); }
+  .drie b { display:block; margin-bottom:4px; }
+  .drie span { color:var(--zacht); }
+  ol.stappen { list-style:none; margin:14px 0; padding:0; counter-reset:s; }
+  ol.stappen > li { counter-increment:s; display:grid; grid-template-columns:34px 1fr; gap:14px; padding:14px 0; border-top:1px solid var(--rand); color:var(--zacht); }
+  ol.stappen > li::before { content:counter(s); width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
+    background:var(--vlak); border:1px solid var(--rand-sterk); font-weight:600; font-size:14px; color:var(--tekst); }
+  ul { margin:8px 0 12px; padding-left:20px; color:var(--zacht); }
+  li { margin:5px 0; }
+  .knop { display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 20px; border:0; border-radius:12px;
+    background:linear-gradient(180deg,var(--oranje),var(--oranje-diep)); color:#fff; font:600 15px var(--sans); cursor:pointer;
+    box-shadow:0 10px 30px -12px rgba(255,90,46,.7), inset 0 1px 0 rgba(255,255,255,.18); }
+  .zin { display:flex; align-items:center; gap:10px; margin-top:10px; padding:10px 10px 10px 16px; border-radius:12px;
+    background:#0d1320; border:1px solid var(--rand-sterk); }
+  .zin span { flex:1; min-width:0; color:var(--tekst); overflow-wrap:anywhere; }
+  .zin .knop { height:40px; padding:0 16px; flex:none; }
+  .goed { color:var(--groen); }
+  .klein { font-size:14px; color:var(--stil); }
+  .voet { margin-top:48px; color:var(--stil); font-size:14px; }
+  @media (max-width:420px) { .zin { flex-direction:column; align-items:stretch; } }
+  @media (prefers-reduced-motion: reduce) { main { animation:none; } }
+</style>
+</head>
+<body>
+<div class="kop"><img src="../wizard-assets/mark.svg" alt=""><span>Mainframe</span></div>
+<main>
+  <h1>Je sleutels veilig</h1>
+  <p class="sub">Eén keer een paar minuten. Daarna merk je er niets meer van.</p>
+
+  <h2>Wat zijn sleutels?</h2>
+  <p>Je Mainframe mag namens jou in je mail, je agenda, je boekhouding en je andere programma's. Daarvoor heeft hij per programma een <b>sleutel</b>: een lange code die zegt dat hij dat mag.</p>
+  <p>Wie zo'n code heeft, kan precies hetzelfde als jouw Mainframe. Mail lezen, mail versturen, je agenda zien.</p>
+  <p>Al die sleutels staan in één bestand in je Mainframe-map. Dat bestand heet <b>.env</b>. Tot nu toe kon iedereen die dat bestand opende ze gewoon lezen.</p>
+
+  <h2>Waarom dit nodig is</h2>
+  <p>Er zijn drie manieren waarop je sleutels bij een ander terechtkomen, zonder dat je het merkt:</p>
+  <div class="drie">
+    <div><b>Je map gaat mee naar een andere plek</b><span>Een back-up, een cloudmap zoals iCloud, OneDrive of Dropbox, of GitHub. Dan gaat het bestand met je sleutels mee, leesbaar.</span></div>
+    <div><b>Je laptop raakt weg</b><span>Gestolen of laten liggen. Wie hem openmaakt, kan het bestand lezen.</span></div>
+    <div><b>Je AI laat een sleutel zien</b><span>Vraag je Claude iets over je instellingen, dan opent hij soms dat bestand. Alles wat in een gesprek staat, gaat naar het AI-bedrijf en blijft in de gesprekslogs op je computer staan.</span></div>
+  </div>
+
+  <h2>Wat de wizard doet</h2>
+  <ol class="stappen">
+    <li><div><b>Hij maakt één hoofdsleutel.</b> Een code van 64 tekens. Met die ene code zijn al je andere sleutels te openen, zonder die code niet.</div></li>
+    <li><div><b>Hij laat die hoofdsleutel één keer zien.</b> Jij klikt op Kopieer en bewaart hem. Daarna vink je aan dat je hem bewaard hebt.</div></li>
+    <li><div><b>Hij versleutelt je sleutels.</b> Naast je .env komt een versie die onleesbaar is zonder je hoofdsleutel. Die mag gerust mee in een back-up of naar GitHub.</div></li>
+    <li><div><b>Hij controleert of het klopt.</b> Hij maakt de versleutelde versie weer open en kijkt of er precies hetzelfde uitkomt. Pas als dat zo is, gaat hij verder.</div></li>
+    <li><div><b>Hij haalt de leesbare versie uit je Mainframe-map.</b> Die gaat naar een afgeschermde map op je computer, die alleen jij kunt openen. Op de oude plek komt een verwijzing, zodat alles gewoon blijft werken.</div></li>
+  </ol>
+  <p class="klein">Er wordt niets weggegooid. Gaat er onderweg iets mis, dan blijft alles zoals het was.</p>
+
+  <h2>Waar bewaar je je hoofdsleutel?</h2>
+  <div class="vlak">
+    <p><b>In je wachtwoordmanager.</b> NordPass, 1Password of Bitwarden. Maak een nieuw item met de naam <b>Mainframe-hoofdsleutel</b> en plak hem erin.</p>
+    <p><b>Of op papier.</b> Schrijf hem over en leg het op een veilige plek, bijvoorbeeld in een kluis.</p>
+    <p>Niet in een gesprek met je AI, niet in een mail en niet in een notitie zonder wachtwoord.</p>
+  </div>
+
+  <h2>Heb je meer dan één computer?</h2>
+  <p>Dan wordt het juist makkelijker. Je versleutelde sleutels mogen gewoon mee naar GitHub, samen met de rest van je Mainframe. Zonder je hoofdsleutel heeft niemand er iets aan. Je hoeft je .env dus niet meer met de hand van de ene naar de andere computer te slepen.</p>
+  <p>Op je eerste computer maak je de hoofdsleutel. Op elke volgende computer haal je je Mainframe op en plak je dezelfde hoofdsleutel uit je wachtwoordmanager. De wizard zet dan al je sleutels terug.</p>
+  <p>Plak je per ongeluk een verkeerde? Dan krijg je een melding en verandert er niets.</p>
+
+  <h2>Wat merk je ervan?</h2>
+  <p><b>Niets.</b> Je Mainframe, de app en Jarvis werken precies zoals altijd.</p>
+  <p>Koppel je later iets nieuws? Draai de wizard dan nog een keer. Hij ziet zelf wat er veranderd is, werkt de versleutelde versie bij en vraagt niets opnieuw.</p>
+
+  <h2>En als ik mijn hoofdsleutel kwijtraak?</h2>
+  <p>Zolang je computer het doet, werkt alles gewoon door. Je hebt de hoofdsleutel alleen nodig op een nieuwe computer, of als je computer stuk is en je je Mainframe terugzet uit een back-up.</p>
+  <p>Ben je hem dan kwijt, dan moet je je koppelingen opnieuw aanmaken. Daarom bewaar je hem meteen goed.</p>
+
+  <h2>Wat dit niet tegenhoudt</h2>
+  <p>Draait er een virus op je computer onder jouw naam, dan kan dat bij alles wat jij kunt, ook bij je sleutels. Hiertegen helpt geen wizard. Wel dit:</p>
+  <ul>
+    <li><b>Zet schijfversleuteling aan.</b> Op een Mac heet dat FileVault (Systeeminstellingen, Privacy en beveiliging). Op Windows heet het BitLocker of Apparaatversleuteling. Dan is een gestolen laptop niet te lezen.</li>
+    <li><b>Installeer alleen programma's die je vertrouwt.</b></li>
+  </ul>
+  <p class="klein">Op Windows blijft de leesbare versie in je Mainframe-map staan, want Windows staat de verwijzing alleen toe met beheerdersrechten. De versleutelde versie en je hoofdsleutel krijg je wel. Zet op Windows zeker BitLocker aan.</p>
+
+  <h2>Zo start je</h2>
+  <div class="vlak">
+    <p><b>Installeer je je Mainframe nieuw?</b> Dan zit deze stap er vanzelf in. Je hoeft niets apart te doen.</p>
+    <p><b>Heb je al een Mainframe?</b> Open Claude Code in je Mainframe-map en plak deze zin:</p>
+    <div class="zin"><span id="zin">Zet mijn sleutels veilig volgens link.slimwerken.ai/sleutels</span>
+      <button class="knop" type="button" id="kopieer">Kopieer</button></div>
+    <p class="klein" style="margin-top:10px">Er opent een venster in je browser dat je stap voor stap helpt. Je hoofdsleutel komt alleen in dat venster, nooit in het gesprek met Claude.</p>
+  </div>
+
+  <p class="voet">Vragen? Stel ze in de community.</p>
+</main>
+<script>
+  document.getElementById("kopieer").addEventListener("click", async (e) => {
+    const t = document.getElementById("zin").textContent;
+    try { await navigator.clipboard.writeText(t); } catch (_) {
+      const r = document.createRange(); r.selectNodeContents(document.getElementById("zin"));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy");
+    }
+    e.target.textContent = "Gekopieerd"; setTimeout(() => (e.target.textContent = "Kopieer"), 1800);
+  });
+</script>
+</body>
+</html>
