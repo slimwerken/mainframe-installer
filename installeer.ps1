@@ -14,10 +14,10 @@ $ProgressPreference = "SilentlyContinue"
 $Bronnen = @("https://raw.githubusercontent.com/slimwerken/mainframe-installer/main", "https://slimwerken.ai/installeer")
 # MF_BRONNEN: alleen voor /installer-test (een proefversie op een vaste GitHub-commit).
 if ($env:MF_BRONNEN) { $Bronnen = $env:MF_BRONNEN -split ' ' }
-$WizardZip = "wizard-95c4f5ff9c.zip"
+$WizardZip = "wizard-1924c73fe0.zip"
 # De SHA-256 van precies die zip, vastgezet door scripts/publiceer.py. Een zip die hier
 # niet op klopt wordt nooit uitgepakt of gestart. Veiligheidscheck 23 okt 2026 (M6).
-$WizardSha256 = "95c4f5ff9c764fb913303cf1ffed9ee3348049d627e608e891410bf598ce9b1e"
+$WizardSha256 = "1924c73fe0193eefb944b7ebae95fdd3c8ffed5b4f0a47cd359f74d5ecfb7404"
 $Map = Join-Path $env:USERPROFILE ".mainframe-installer"
 
 Write-Host ""
