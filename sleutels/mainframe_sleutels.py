@@ -90,6 +90,21 @@ def _systeem() -> tuple[str, str]:
     return s, m
 
 
+def _pakketsleutel() -> tuple[str, str]:
+    """Welk dotenvx-pakket bij deze computer hoort.
+
+    Windows op een ARM-processor (Copilot+ laptops, Surface met ARM-chip) meldt arm64, maar
+    dotenvx heeft geen ARM-build voor Windows (release v2.38.2, nagekeken 5 nov 2026). Windows 11
+    draait x64-programma's via emulatie, dus daar hoort het x86_64-pakket (melding John Andrew,
+    radar 5 nov 2026: de wizard stopte met 'dotenvx is er niet voor deze computer (windows arm64)')."""
+    sleutel = _systeem()
+    if sleutel == ("windows", "arm64"):
+        sleutel = ("windows", "x86_64")
+    if sleutel not in DOTENVX_PAKKET:
+        raise SleutelFout(f"dotenvx is er niet voor deze computer ({sleutel[0]} {sleutel[1]})")
+    return sleutel
+
+
 def dotenvx() -> str:
     """Het pad naar dotenvx; zet de vaste versie neer als hij er nog niet is."""
     naam = "dotenvx.exe" if is_windows() else "dotenvx"
@@ -99,10 +114,7 @@ def dotenvx() -> str:
     gevonden = shutil.which("dotenvx")
     if gevonden:
         return gevonden
-    sleutel = _systeem()
-    if sleutel not in DOTENVX_PAKKET:
-        raise SleutelFout(f"dotenvx is er niet voor deze computer ({sleutel[0]} {sleutel[1]})")
-    bestand, controle = DOTENVX_PAKKET[sleutel]
+    bestand, controle = DOTENVX_PAKKET[_pakketsleutel()]
     url = f"https://github.com/dotenvx/dotenvx/releases/download/v{DOTENVX_VERSIE}/dotenvx-{DOTENVX_VERSIE}-{bestand}"
     try:
         with urllib.request.urlopen(url, timeout=120) as r:
@@ -232,18 +244,64 @@ def zet_hoofdsleutel(sleutel: str, map_: Path) -> str:
 # ---------- bestanden ----------
 
 def parse(tekst: str) -> dict[str, str]:
+    """Leest een .env. Een waarde tussen aanhalingstekens mag over meerdere regels lopen
+    (een RSA-sleutel van DocuSign bijvoorbeeld); die regels horen bij dezelfde naam.
+
+    Tot 4 november 2026 bleef van zo'n waarde alleen de eerste regel over (met het
+    aanhalingsteken ervoor) en werd een vervolgregel die op = eindigde een losse naam.
+    Gemeld door een lid onder de aankondiging; de controle miste het omdat die met
+    dezelfde parser vergeleek."""
     uit: dict[str, str] = {}
-    for regel in tekst.splitlines():
+    regels = tekst.splitlines()
+    i = 0
+    while i < len(regels):
+        regel = regels[i]
+        i += 1
         m = REGEL.match(regel)
         if not m or regel.lstrip().startswith("#"):
             continue
-        waarde = m.group(2).strip()
-        if len(waarde) >= 2 and waarde[0] == waarde[-1] and waarde[0] in "\"'":
-            waarde = waarde[1:-1]
+        naam, waarde = m.group(1), m.group(2).strip()
+        if waarde[:1] in ("\"", "'"):
+            q = waarde[0]
+            if len(waarde) >= 2 and waarde.endswith(q):
+                waarde = waarde[1:-1]
+            else:
+                delen, gesloten = [waarde[1:]], False
+                while i < len(regels):
+                    vervolg = regels[i]
+                    i += 1
+                    kaal = vervolg.rstrip()
+                    slot = kaal.rfind(q)
+                    staart = kaal[slot + 1:].lstrip() if slot >= 0 else None
+                    if slot >= 0 and (staart == "" or staart.startswith("#")):
+                        delen.append(kaal[:slot])
+                        gesloten = True
+                        break
+                    delen.append(vervolg)
+                if not gesloten:
+                    raise SleutelFout(f"{naam}: de waarde begint met {q} maar het sluitende {q} ontbreekt; "
+                                      "er is niets veranderd")
+                waarde = "\n".join(delen)
         elif " #" in waarde:
             waarde = waarde.split(" #", 1)[0].rstrip()
-        uit[m.group(1)] = waarde
+        uit[naam] = waarde
     return uit
+
+
+def _namen_volgens_dotenvx(p: Path) -> set[str] | None:
+    """De namen in een leesbaar .env-bestand zoals dotenvx ze leest: een tweede lezer naast
+    parse(), zodat de controle niet alleen met zichzelf vergelijkt. None als dotenvx het
+    bestand niet kan lezen (dan telt alleen de gewone vergelijking)."""
+    try:
+        with tempfile.TemporaryDirectory(prefix="mainframe-sleutels-") as werk:
+            uit = json.loads(_dotenvx(["get", "-f", str(p), "-fk", str(Path(werk) / ".env.keys"),
+                                       "--format", "json"]))
+    except (SleutelFout, ValueError, OSError):
+        return None
+    if not isinstance(uit, dict):
+        return None
+    uit.pop("DOTENV_PUBLIC_KEY", None)
+    return set(uit)
 
 
 def versleuteld_pad(p: Path) -> Path:
@@ -348,6 +406,14 @@ def _controleer(p: Path, prive: str) -> None:
     anders = sorted(n for n in set(gelezen) | set(oud) if gelezen.get(n) != oud.get(n))
     if anders:
         raise SleutelFout(f"de versleutelde versie wijkt af voor {', '.join(anders)}; er is niets verplaatst")
+    # Tweede lezer (4 november 2026): dotenvx leest het leesbare bestand zelf. Zien die twee
+    # andere namen, dan heeft parse() iets gemist of verzonnen (bijvoorbeeld een vervolgregel
+    # van een meerregelige sleutel die op = eindigt) en is de controle hierboven niets waard.
+    volgens_dotenvx = _namen_volgens_dotenvx(p)
+    if volgens_dotenvx is not None and volgens_dotenvx != set(oud):
+        verschil = sorted(volgens_dotenvx ^ set(oud))
+        raise SleutelFout(f"het leesbare bestand wordt door dotenvx anders gelezen dan door de wizard "
+                          f"({', '.join(verschil)}); er is niets verplaatst")
 
 
 def uit_de_map(p: Path) -> str:
