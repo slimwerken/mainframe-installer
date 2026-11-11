@@ -137,16 +137,8 @@ def dotenvx() -> str:
     return str(eigen)
 
 
-_OMGEVING_NODIG = {"PATH", "HOME", "USERPROFILE", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "TMPDIR",
-                   "APPDATA", "LOCALAPPDATA", "PROGRAMDATA", "COMSPEC", "PATHEXT", "LANG", "LC_ALL"}
-
-
 def _dotenvx(args: list[str], prive: str | None = None, vlaggen: bool = True) -> str:
-    # Alleen wat dotenvx nodig heeft om te draaien. Staat een sleutelnaam ook als omgevingsvariabele op de
-    # computer (bijvoorbeeld GEMINI_API_KEY in de terminal), dan geeft dotenvx die waarde terug in plaats van
-    # die uit het bestand. Dan wees de controle elke sleutel af, en zou het terugzetten op een tweede computer
-    # stil de verkeerde waarde in de .env zetten (gevonden 11 nov 2026 met de test van de installerstap).
-    omg = {k: v for k, v in os.environ.items() if k.upper() in _OMGEVING_NODIG}
+    omg = {k: v for k, v in os.environ.items() if not k.startswith("DOTENV_")}
     if prive:
         omg["DOTENV_PRIVATE_KEY"] = prive
     try:
