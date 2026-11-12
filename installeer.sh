@@ -14,11 +14,11 @@ set -eu
 
 # MF_BRONNEN: alleen voor /installer-test (een proefversie op een vaste GitHub-commit).
 BRONNEN="${MF_BRONNEN:-https://raw.githubusercontent.com/slimwerken/mainframe-installer/main https://slimwerken.ai/installeer}"
-WIZARD_ZIP="wizard-d458aec8f8.zip"
+WIZARD_ZIP="wizard-b77bded920.zip"
 # De SHA-256 van precies die zip, vastgezet door scripts/publiceer.py. Een zip die
 # hier niet op klopt (een andere bron die is overgenomen, of een kapotte download)
 # wordt nooit uitgepakt of gestart. Veiligheidscheck 23 okt 2026 (M6).
-WIZARD_SHA256="d458aec8f8ee2a7bcf39f51303cf85bfd586ee86065a0ac970ab32d33ae11113"
+WIZARD_SHA256="b77bded920f0a16f458de89284729de2701d39f1497f7eca62126f49a5b662e2"
 MAP="$HOME/.mainframe-installer"
 ACHTERGROND=0
 for arg in "$@"; do
