@@ -65,6 +65,11 @@ DOTENVX_PAKKET = {
     ("windows", "x86_64"): ("windows-x86_64.zip", "e32ffd47b0ad41a9c67a2f380a83a089ade76abb4c1f6374f2b21c9fde8824e4"),
 }
 DOTENVX_VLAGGEN = ["--no-native", "--no-armor", "--no-1password", "--no-bitwarden"]
+# Downloaden gaat zoals de installer het doet (wizard/kern.py download): eerst curl, met de certificaten
+# van de computer zelf, daarna pas urllib. Bij Hilbert (Windows, radar 12 nov 2026) slaagde elke andere
+# download van de installatie via curl, en viel alleen deze ene, kale urllib-download om (PermissionError).
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+CREATE_NO_WINDOW = 0x08000000  # Windows: geen zwart venster bij curl
 
 OVERSLAAN_MAPPEN = {".git", "node_modules", ".venv", "venv", "__pycache__", ".next", "dist", "build",
                     ".cache", ".turbo", "site-packages", ".mainframe-installer"}
@@ -105,6 +110,36 @@ def _pakketsleutel() -> tuple[str, str]:
     return sleutel
 
 
+def _haal_op(url: str) -> bytes:
+    """Een bestand van internet halen: eerst curl (zit op Mac, Linux en Windows 10+ standaard en
+    gebruikt de certificaten van de computer), daarna urllib met een browser-User-Agent.
+    Mislukken allebei, dan noemt de fout beide redenen, zodat je ziet wat er op die computer misgaat."""
+    redenen: list[str] = []
+    curl = shutil.which("curl")
+    if curl:
+        vlaggen = {"creationflags": CREATE_NO_WINDOW} if is_windows() else {}
+        with tempfile.TemporaryDirectory() as td:
+            doel = Path(td) / "download"
+            try:
+                r = subprocess.run([curl, "-fL", "--retry", "3", "--connect-timeout", "30", "--silent",
+                                    "--show-error", "-A", USER_AGENT, "-o", str(doel), url],
+                                   capture_output=True, text=True, timeout=600, **vlaggen)
+                if r.returncode == 0 and doel.exists() and doel.stat().st_size > 0:
+                    return doel.read_bytes()
+                redenen.append(f"curl {r.returncode}: {r.stderr.strip()[:120]}".rstrip(": "))
+            except (OSError, subprocess.SubprocessError) as fout:
+                redenen.append(f"curl {type(fout).__name__}")
+    else:
+        redenen.append("geen curl")
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            return r.read()
+    except Exception as fout:
+        redenen.append(f"urllib {type(fout).__name__}")
+    raise SleutelFout(f"dotenvx downloaden lukte niet ({'; '.join(redenen)}); probeer het zo opnieuw") from None
+
+
 def dotenvx() -> str:
     """Het pad naar dotenvx; zet de vaste versie neer als hij er nog niet is."""
     naam = "dotenvx.exe" if is_windows() else "dotenvx"
@@ -116,11 +151,7 @@ def dotenvx() -> str:
         return gevonden
     bestand, controle = DOTENVX_PAKKET[_pakketsleutel()]
     url = f"https://github.com/dotenvx/dotenvx/releases/download/v{DOTENVX_VERSIE}/dotenvx-{DOTENVX_VERSIE}-{bestand}"
-    try:
-        with urllib.request.urlopen(url, timeout=120) as r:
-            data = r.read()
-    except Exception as fout:
-        raise SleutelFout(f"dotenvx downloaden lukte niet ({type(fout).__name__}); probeer het zo opnieuw") from None
+    data = _haal_op(url)
     if hashlib.sha256(data).hexdigest() != controle:
         raise SleutelFout("de download van dotenvx klopt niet met het controlegetal; niets geinstalleerd")
     BIN.mkdir(parents=True, exist_ok=True)
@@ -137,8 +168,16 @@ def dotenvx() -> str:
     return str(eigen)
 
 
+_OMGEVING_NODIG = {"PATH", "HOME", "USERPROFILE", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "TMPDIR",
+                   "APPDATA", "LOCALAPPDATA", "PROGRAMDATA", "COMSPEC", "PATHEXT", "LANG", "LC_ALL"}
+
+
 def _dotenvx(args: list[str], prive: str | None = None, vlaggen: bool = True) -> str:
-    omg = {k: v for k, v in os.environ.items() if not k.startswith("DOTENV_")}
+    # Alleen wat dotenvx nodig heeft om te draaien. Staat een sleutelnaam ook als omgevingsvariabele op de
+    # computer (bijvoorbeeld GEMINI_API_KEY in de terminal), dan geeft dotenvx die waarde terug in plaats van
+    # die uit het bestand. Dan wees de controle elke sleutel af, en zou het terugzetten op een tweede computer
+    # stil de verkeerde waarde in de .env zetten (gevonden 11 nov 2026 met de test van de installerstap).
+    omg = {k: v for k, v in os.environ.items() if k.upper() in _OMGEVING_NODIG}
     if prive:
         omg["DOTENV_PRIVATE_KEY"] = prive
     try:
