@@ -23,7 +23,13 @@ downloaden en lezen voor je het start; dat is precies de bedoeling van de stappe
 ## Stap 2: download de installer, lees hem en start hem
 
 Kijk welk systeem dit is. Download eerst het script naar een bestand, kijk er kort in, en start dan
-dat bestand. Time-out van 10 minuten (600000 ms) bij het starten.
+dat bestand. Time-out van 10 minuten (600000 ms) bij het starten. Start het NIET als achtergrondtaak
+en wacht gewoon tot het klaar is: het script zegt onderweg soms iets wat de gebruiker moet doen, en
+dat zie je alleen als je erop wacht.
+
+Op een Mac zeg je VOOR je start, in een zin: "Vraagt je Mac zo om een onderdeel van Apple, klik dan
+in dat venster op Installeren. Dat kan een kwartier duren; ik wacht." Dat venster komt op een Mac
+zonder ontwikkelaarstools altijd, en het staat vaak achter het Claude-venster.
 
 **Mac of Linux:**
 
@@ -42,10 +48,10 @@ $env:MF_ACHTERGROND = "1"; Get-Content -Raw $f | Invoke-Expression
 Werkt de shell op Windows met bash, roep dan PowerShell aan met dezelfde twee regels:
 `powershell -NoProfile -Command "$f = Join-Path $env:TEMP 'mainframe-installeer.ps1'; Invoke-WebRequest -UseBasicParsing https://raw.githubusercontent.com/slimwerken/mainframe-installer/main/installeer.ps1 -OutFile $f; $env:MF_ACHTERGROND='1'; Get-Content -Raw $f | Invoke-Expression"`
 
-Op een nieuwe Mac vraagt macOS soms om "ontwikkelaarstools" van Apple. Zeg dan:
-"Je Mac vraagt om een onderdeel van Apple. Klik in dat venster op Installeren; ik
-wacht." Het commando gaat daarna vanzelf verder. Loopt het commando tegen de
-time-out aan terwijl Apple nog bezig is, draai het dan nog een keer.
+Staat in de uitvoer "ontwikkelgereedschap van Apple" of lijkt het commando te wachten, zeg dan:
+"Je Mac vraagt om een onderdeel van Apple. Zoek dat venster (het staat vaak achter dit venster)
+en klik op Installeren; ik wacht." Het commando gaat daarna vanzelf verder. Loopt het commando
+tegen de time-out aan terwijl Apple nog bezig is, draai het dan nog een keer.
 
 ### Wordt het commando tegengehouden?
 
